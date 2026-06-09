@@ -1,0 +1,74 @@
+{
+  "name": "atmosphere",
+  "displayName": "Atmosphere",
+  "description": "The lightweight IDE with local intelligence.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Machine Learning",
+    "Programming Languages"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "atmosphere.startChat",
+        "title": "Atmosphere: Start Chat"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "atmosphere-sidebar",
+          "title": "Atmosphere",
+          "icon": "media/logo.svg"
+        }
+      ]
+    },
+    "views": {
+      "atmosphere-sidebar": [
+        {
+          "type": "webview",
+          "id": "atmosphere.chatView",
+          "name": "Chat"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Atmosphere",
+      "properties": {
+        "atmosphere.ollamaEndpoint": {
+          "type": "string",
+          "default": "http://localhost:11434",
+          "description": "The HTTP endpoint for your Ollama instance."
+        },
+        "atmosphere.model": {
+          "type": "string",
+          "enum": [
+            "deepseek-coder",
+            "codellama",
+            "llama3"
+          ],
+          "default": "deepseek-coder",
+          "description": "The Ollama model to use for AI coding suggestions."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "@types/node": "18.x",
+    "typescript": "^5.1.6"
+  }
+}
