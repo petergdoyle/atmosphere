@@ -10,6 +10,47 @@ export interface OllamaRequestOptions {
 }
 
 export class OllamaClient {
+    public async listModels(endpoint: string): Promise<string[]> {
+        return new Promise((resolve, reject) => {
+            try {
+                const apiUrl = new URL('/api/tags', endpoint);
+                const requestModule = apiUrl.protocol === 'https:' ? https : http;
+
+                const req = requestModule.get(apiUrl, (res) => {
+                    if (res.statusCode && res.statusCode >= 400) {
+                        reject(new Error(`Ollama API error: ${res.statusCode}`));
+                        return;
+                    }
+
+                    let data = '';
+                    res.on('data', (chunk) => {
+                        data += chunk;
+                    });
+
+                    res.on('end', () => {
+                        try {
+                            const parsed = JSON.parse(data);
+                            if (parsed.models && Array.isArray(parsed.models)) {
+                                const models = parsed.models.map((m: any) => m.name);
+                                resolve(models);
+                            } else {
+                                resolve([]);
+                            }
+                        } catch (e) {
+                            reject(e);
+                        }
+                    });
+                });
+
+                req.on('error', (e) => {
+                    reject(e);
+                });
+            } catch (err) {
+                reject(err);
+            }
+        });
+    }
+
     public async generateStream(
         options: OllamaRequestOptions,
         onToken: (token: string) => void

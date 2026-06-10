@@ -8,6 +8,15 @@ class SidebarProvider {
         this._extensionUri = _extensionUri;
         this._ollamaClient = new OllamaClient_1.OllamaClient();
     }
+    postMessageToWebview(message) {
+        if (this._view) {
+            this._view.show?.(true);
+            this._view.webview.postMessage(message);
+        }
+        else {
+            this._pendingMessage = message;
+        }
+    }
     resolveWebviewView(webviewView) {
         this._view = webviewView;
         webviewView.webview.options = {
@@ -15,6 +24,12 @@ class SidebarProvider {
             localResourceRoots: [this._extensionUri],
         };
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+        if (this._pendingMessage) {
+            setTimeout(() => {
+                this._view?.webview.postMessage(this._pendingMessage);
+                this._pendingMessage = undefined;
+            }, 200);
+        }
         webviewView.webview.onDidReceiveMessage(async (data) => {
             switch (data.type) {
                 case "askOllama": {
@@ -54,6 +69,26 @@ class SidebarProvider {
                     }
                     break;
                 }
+                case "getModels": {
+                    const config = vscode.workspace.getConfiguration("atmosphere");
+                    const endpoint = config.get("ollamaEndpoint") || "http://localhost:11434";
+                    const currentModel = config.get("model") || "deepseek-coder";
+                    try {
+                        const models = await this._ollamaClient.listModels(endpoint);
+                        this._view?.webview.postMessage({ type: "modelsList", value: models, current: currentModel });
+                    }
+                    catch (err) {
+                        this._view?.webview.postMessage({ type: "modelsError", value: err.message });
+                    }
+                    break;
+                }
+                case "selectModel": {
+                    if (data.value) {
+                        const config = vscode.workspace.getConfiguration("atmosphere");
+                        await config.update("model", data.value, vscode.ConfigurationTarget.Global);
+                    }
+                    break;
+                }
             }
         });
     }
@@ -76,6 +111,15 @@ class SidebarProvider {
 			</head>
 			<body>
         <div class="chat-container">
+          <div class="chat-header">
+            <div class="connection-status">
+              <span class="status-dot offline" id="status-dot"></span>
+              <span class="status-text" id="status-text">Connecting...</span>
+            </div>
+            <select id="model-select" class="model-select">
+              <option value="">Loading models...</option>
+            </select>
+          </div>
           <div id="chat-history">
             <div class="message system-message">
               <div class="logo-container">

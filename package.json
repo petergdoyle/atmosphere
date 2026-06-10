@@ -3,6 +3,10 @@
   "displayName": "Atmosphere",
   "description": "The lightweight IDE with local intelligence.",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/petergdoyle/atmosphere-ide"
+  },
   "engines": {
     "vscode": "^1.80.0"
   },
@@ -17,8 +21,39 @@
       {
         "command": "atmosphere.startChat",
         "title": "Atmosphere: Start Chat"
+      },
+      {
+        "command": "atmosphere.explainSelection",
+        "title": "Atmosphere: Explain Selection"
+      },
+      {
+        "command": "atmosphere.fixSelection",
+        "title": "Atmosphere: Fix Selection"
+      },
+      {
+        "command": "atmosphere.generateTests",
+        "title": "Atmosphere: Generate Unit Tests"
       }
     ],
+    "menus": {
+      "editor/context": [
+        {
+          "when": "editorHasSelection",
+          "command": "atmosphere.explainSelection",
+          "group": "atmosphere@1"
+        },
+        {
+          "when": "editorHasSelection",
+          "command": "atmosphere.fixSelection",
+          "group": "atmosphere@2"
+        },
+        {
+          "when": "editorHasSelection",
+          "command": "atmosphere.generateTests",
+          "group": "atmosphere@3"
+        }
+      ]
+    },
     "viewsContainers": {
       "activitybar": [
         {
@@ -47,11 +82,6 @@
         },
         "atmosphere.model": {
           "type": "string",
-          "enum": [
-            "deepseek-coder",
-            "codellama",
-            "llama3"
-          ],
           "default": "deepseek-coder",
           "description": "The Ollama model to use for AI coding suggestions."
         }
