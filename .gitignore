@@ -1,0 +1,15 @@
+# Node dependencies
+node_modules/*
+!node_modules/.gitkeep
+
+# TypeScript compilation output
+out/
+
+# Build artifacts
+*.vsix
+
+# VS Code test cache
+.vscode-test/
+
+# OS files
+.DS_Store
