@@ -3,7 +3,8 @@ node_modules/*
 !node_modules/.gitkeep
 
 # TypeScript compilation output
-out/
+out/*
+!out/.gitkeep
 
 # Build artifacts
 *.vsix
